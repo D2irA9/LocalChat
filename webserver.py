@@ -6,59 +6,228 @@ class WebChatHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
             self.send_response(200)
-            self.send_header('Content-type', 'text/html')
+            self.send_header('Content-type', 'text/html; charset=utf-8')  # Добавили кодировку
             self.end_headers()
-            with open('index.html', 'rb') as f:
-                self.wfile.write(f.read())
+
+            # Читаем файл с правильной кодировкой
+            with open('index.html', 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            self.wfile.write(html_content.encode('utf-8'))  # Кодируем в utf-8
+
+        elif self.path == '/style.css':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/css; charset=utf-8')
+            self.end_headers()
+            with open('style.css', 'r', encoding='utf-8') as f:
+                css_content = f.read()
+            self.wfile.write(css_content.encode('utf-8'))
+
         else:
-            super().do_GET()
+            self.send_error(404, "File Not Found")
 
 
 def start_web_server():
     web_server = HTTPServer(('0.0.0.0', 8000), WebChatHandler)
-    print("🌐 Веб-сервер запущен на порту 8000")
+    print("🌐 Веб-сервер запущен на http://0.0.0.0:8000")
+    print("📱 Откройте в браузере телефона: http://ВАШ_IP:8000")
     web_server.serve_forever()
 
 
 if __name__ == "__main__":
-    # Создаем HTML файл
+    # Создаем HTML файл с правильной структурой
     html_content = """<!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мобильный чат</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial; margin: 0; padding: 10px; background: #f0f0f0; }
-        #chat { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; 
-                margin-bottom: 10px; background: white; border-radius: 5px; }
-        input { padding: 10px; margin: 5px; width: 70%; border-radius: 5px; border: 1px solid #ccc; }
-        button { padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4a5568;
+            font-size: 24px;
+        }
+
+        #chat {
+            border: 2px solid #e2e8f0;
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            #chat {
+                height: 250px;
+                font-size: 14px;
+            }
+
+            input, button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h2>📱 Мобильный чат</h2>
-    <div id="chat"></div>
-    <div>
-        <input type="text" id="message" placeholder="Введите сообщение...">
-        <button onclick="sendMessage()">Отправить</button>
+    <div class="container">
+        <h2>📱 Мобильный чат</h2>
+
+        <div id="chat">
+            <div class="message">
+                <strong>🤖 Система:</strong> Добро пожаловать в чат!
+            </div>
+            <div class="message">
+                <strong>💡 Информация:</strong> Веб-версия чата
+            </div>
+            <div class="message">
+                <strong>🌐 Статус:</strong> Socket-сервер работает на порту 5555
+            </div>
+            <div class="message">
+                <strong>📞 Для полного функционала:</strong> Используйте mobile_client.py в Termux
+            </div>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="message" placeholder="Введите сообщение..." onkeypress="if(event.key=='Enter')sendMessage()">
+            <button onclick="sendMessage()">📤 Отправить</button>
+        </div>
+
+        <div class="status">
+            📶 Подключение: <span id="status">Веб-интерфейс активен</span>
+        </div>
     </div>
 
     <script>
-        // Эта версия пока только показывает статическую страницу
-        // WebSocket потребует дополнительной настройки на сервере
-        document.getElementById('chat').innerHTML = 
-            '⚠️ Веб-версия в разработке. Используйте Termux или desktop клиент.<br>' +
-            '✅ Сервер socket чата работает на порту 5555<br>' +
-            '📞 Для подключения с телефона используйте mobile_client.py в Termux';
-
         function sendMessage() {
-            alert('WebSocket версия в разработке. Используйте мобильный клиент.');
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value.trim();
+
+            if (message) {
+                const chat = document.getElementById('chat');
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
+                messageElement.innerHTML = `<strong>👤 Вы:</strong> ${message}`;
+                chat.appendChild(messageElement);
+
+                // Прокрутка вниз
+                chat.scrollTop = chat.scrollHeight;
+
+                // Очистка поля ввода
+                messageInput.value = '';
+
+                // Здесь будет отправка на сервер через WebSocket
+                alert('Сообщение: "' + message + '"\nWebSocket подключение в разработке');
+            }
         }
+
+        // Автопрокрутка при загрузке
+        window.addEventListener('load', function() {
+            const chat = document.getElementById('chat');
+            chat.scrollTop = chat.scrollHeight;
+        });
     </script>
 </body>
 </html>"""
 
+    # Сохраняем HTML файл
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html_content)
 
+    print("🛠️ Создан index.html с правильной кодировкой")
+    print("🚀 Запускаем веб-сервер...")
     start_web_server()
