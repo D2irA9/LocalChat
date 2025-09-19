@@ -1,9 +1,5 @@
 ﻿import socket
 import threading
-from http.server import SimpleHTTPRequestHandler, HTTPServer
-import socket
-import threading
-import json
 
 class ChatServer:
     def __init__(self, host='0.0.0.0', port=5555):
@@ -61,67 +57,6 @@ class ChatServer:
             self.broadcast(f"{nickname} покинул чат".encode('utf-8'))
             client.close()
             print(f"❌ {nickname} отключился")
-
-
-class WebChatHandler(SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == '/':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            with open('index.html', 'rb') as f:
-                self.wfile.write(f.read())
-        else:
-            super().do_GET()
-
-
-# HTML файл для телефона
-html_content = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Мобильный чат</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { font-family: Arial; margin: 0; padding: 10px; }
-        #chat { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
-        input, button { padding: 10px; margin: 5px; }
-    </style>
-</head>
-<body>
-    <h2>Локальный чат</h2>
-    <div id="chat"></div>
-    <input type="text" id="message" placeholder="Сообщение...">
-    <button onclick="sendMessage()">Отправить</button>
-
-    <script>
-        const ws = new WebSocket('ws://ВАШ_IP:5556');
-
-        ws.onmessage = function(event) {
-            const chat = document.getElementById('chat');
-            chat.innerHTML += event.data + '<br>';
-            chat.scrollTop = chat.scrollHeight;
-        };
-
-        function sendMessage() {
-            const message = document.getElementById('message').value;
-            if(message) {
-                ws.send(message);
-                document.getElementById('message').value = '';
-            }
-        }
-
-        document.getElementById('message').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') sendMessage();
-        });
-    </script>
-</body>
-</html>
-"""
-
-# Сохраните как index.html
-with open('index.html', 'w', encoding='utf-8') as f:
-    f.write(html_content)
 
 if __name__ == "__main__":
     server = ChatServer()
