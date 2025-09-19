@@ -6,21 +6,17 @@ class WebChatHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
             self.send_response(200)
-            self.send_header('Content-type', 'text/html; charset=utf-8')  # Добавили кодировку
+            self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
 
-            # Читаем файл с правильной кодировкой
             with open('index.html', 'r', encoding='utf-8') as f:
                 html_content = f.read()
-            self.wfile.write(html_content.encode('utf-8'))  # Кодируем в utf-8
+            self.wfile.write(html_content.encode('utf-8'))
 
-        elif self.path == '/style.css':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/css; charset=utf-8')
+        elif self.path == '/favicon.ico':
+            # Просто возвращаем пустой ответ для favicon
+            self.send_response(204)  # No Content
             self.end_headers()
-            with open('style.css', 'r', encoding='utf-8') as f:
-                css_content = f.read()
-            self.wfile.write(css_content.encode('utf-8'))
 
         else:
             self.send_error(404, "File Not Found")
