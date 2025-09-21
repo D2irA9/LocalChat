@@ -1,7 +1,6 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import threading
 
-
 class WebChatHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
